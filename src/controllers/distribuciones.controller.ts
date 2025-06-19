@@ -1,11 +1,6 @@
-// En: src/controllers/distribuciones.controller.ts
-
 import { Request, Response } from "express";
 import { pool } from "../config/db";
 
-// -----------------------------------------------------------------------------
-// CREAR una nueva distribución (Versión Transaccional)
-// -----------------------------------------------------------------------------
 export const crearDistribucion = async (req: Request, res: Response) => {
     const { id_cliente, fecha_entrega, responsable, productos, estado } = req.body;
     const client = await pool.connect(); // Obtiene una conexión para la transacción
@@ -144,6 +139,40 @@ export const actualizarEstadoDistribucion = async (req: Request, res: Response) 
         await client.query('ROLLBACK');
         console.error("Error al cambiar estado de distribución:", error);
         res.status(500).json({ mensaje: "Error al cambiar estado", error });
+    } finally {
+        client.release();
+    }
+};
+export const editarDistribucion = async (req: Request, res: Response) => {
+    const { id } = req.params; // El ID de la distribución a editar
+    const { id_cliente, fecha_entrega, responsable, productos } = req.body; // Los nuevos datos del formulario
+
+    const client = await pool.connect();
+
+    try {
+        await client.query('BEGIN');
+        await client.query(
+            `UPDATE distribuciones SET id_cliente = $1, fecha_entrega = $2, responsable = $3 WHERE id_distribucion = $4`,
+            [id_cliente, fecha_entrega, responsable, id]
+        );
+        await client.query(
+            `DELETE FROM detalle_distribuciones WHERE id_distribucion = $1`,
+            [id]
+        );
+        for (const producto of productos) {
+            await client.query(
+                `INSERT INTO detalle_distribuciones (id_distribucion, id_producto, cantidad) VALUES ($1, $2, $3)`,
+                [id, producto.id_producto, producto.cantidad]
+            );
+        }
+
+        await client.query('COMMIT');
+        res.status(200).json({ mensaje: "Distribución actualizada correctamente" });
+
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error("Error en transacción de editar distribución:", error);
+        res.status(500).json({ mensaje: "Error al actualizar la distribución", error });
     } finally {
         client.release();
     }

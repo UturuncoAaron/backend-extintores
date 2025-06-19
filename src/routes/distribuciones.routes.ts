@@ -6,7 +6,7 @@ import {
     listarDistribuciones,
     detalleDistribucion,
     actualizarEstadoDistribucion,
-    eliminarDistribucion
+    eliminarDistribucion,editarDistribucion
 } from "../controllers/distribuciones.controller";
 
 const router = Router();
@@ -14,6 +14,7 @@ router.get("/", listarDistribuciones);
 router.post("/", crearDistribucion);
 router.get("/:id", detalleDistribucion);
 router.put("/:id/estado", actualizarEstadoDistribucion);
+router.put("/:id", editarDistribucion);
 router.delete("/:id", eliminarDistribucion);
 
 export default router;
