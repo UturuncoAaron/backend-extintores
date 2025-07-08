@@ -10,7 +10,6 @@ import {
 
 const router = Router();
 
-// SIN /api/compras
 router.post("/", crearCompra);
 router.get("/", listarCompras);
 router.get("/:id", detalleCompra);

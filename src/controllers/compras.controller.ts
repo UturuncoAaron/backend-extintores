@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { pool } from "../config/db";
 
-// Crear una nueva compra
 export const crearCompra = async (req: Request, res: Response) => {
     try {
         const { id_proveedor, fecha_compra, productos } = req.body;
@@ -38,8 +37,6 @@ export const crearCompra = async (req: Request, res: Response) => {
                 );
             }
         }
-
-        // Actualizar total de la compra
         await pool.query(`UPDATE compras SET total = $1 WHERE id_compra = $2`, [totalCompra, id_compra]);
 
         res.json({ mensaje: "Compra registrada exitosamente", id_compra });
@@ -91,7 +88,7 @@ export const detalleCompra = async (req: Request, res: Response) => {
     }
 };
 
-// Editar compra (fecha o proveedor)
+
 export const editarCompra = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
@@ -113,20 +110,13 @@ export const actualizarEstadoCompra = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
         const { estado } = req.body;
-
-        // Actualizar el estado de la compra
         await pool.query(`UPDATE compras SET estado = $1 WHERE id_compra = $2`, [estado, id]);
-
-        // Si la compra fue recibida, actualizar inventario y registrar movimientos
         if (estado === "Recibida") {
-            // Obtener los productos del detalle de la compra
             const productos = await pool.query(`
                 SELECT id_producto, cantidad
                 FROM detalle_compras
                 WHERE id_compra = $1
             `, [id]);
-
-            // Recorrer los productos y actualizar inventario + registrar movimiento
             for (const producto of productos.rows) {
                 const { id_producto, cantidad } = producto;
 
