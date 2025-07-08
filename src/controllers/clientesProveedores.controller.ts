@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { pool } from "../config/db";
 
-// ─── CLIENTES ────────────────────────────────────────────────
 
 export const crearCliente = async (req: Request, res: Response) => {
     try {
@@ -26,7 +25,7 @@ export const listarClientes = async (_req: Request, res: Response) => {
     }
 };
 
-// ─── PROVEEDORES ─────────────────────────────────────────────
+
 
 export const crearProveedor = async (req: Request, res: Response) => {
     try {
