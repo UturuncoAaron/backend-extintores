@@ -1,6 +1,6 @@
 import { pool } from "../config/db";
 
-// --- CLIENTES (YA ESTÁ CORRECTO, NO SE TOCA) ---
+// --- CLIENTES ---
 interface Cliente {
     nombre: string;
     direccion: string;
@@ -18,8 +18,9 @@ export const ClienteModel = {
             [nombre, direccion, telefono, correo, estado]
         );
     },
+    // CORRECCIÓN: Se añade el filtro para mostrar solo los activos
     listar: async () => {
-        const result = await pool.query(`SELECT * FROM clientes ORDER BY id_cliente ASC`);
+        const result = await pool.query(`SELECT * FROM clientes WHERE estado = TRUE ORDER BY id_cliente ASC`);
         return result.rows;
     },
     editar: async (id: number, cliente: Cliente) => {
@@ -31,22 +32,22 @@ export const ClienteModel = {
             [nombre, direccion, telefono, correo, estado, id]
         );
     },
+    // CORRECCIÓN: Se cambia a un borrado lógico (desactivación)
     eliminar: async (id: number) => {
         return await pool.query(
-            `DELETE FROM clientes WHERE id_cliente = $1`,
+            `UPDATE clientes SET estado = FALSE WHERE id_cliente = $1`,
             [id]
         );
     }
 };
 
 
-// --- PROVEEDORES (SECCIÓN A CORREGIR) ---
+// --- PROVEEDORES ---
 interface Proveedor {
     nombre: string;
     direccion: string;
     telefono: string;
     correo: string;
-    // <-- CAMBIO 1: Añadir 'estado' a la interfaz
     estado?: boolean;
 }
 
@@ -59,12 +60,11 @@ export const ProveedorModel = {
             [nombre, direccion, telefono, correo, estado]
         );
     },
-
+    // CORRECCIÓN: Se añade el filtro para mostrar solo los activos
     listar: async () => {
-        const result = await pool.query(`SELECT * FROM proveedores ORDER BY id_proveedor ASC`);
+        const result = await pool.query(`SELECT * FROM proveedores WHERE estado = TRUE ORDER BY id_proveedor ASC`);
         return result.rows;
     },
-
     editar: async (id: number, proveedor: Proveedor) => {
         const { nombre, direccion, telefono, correo, estado } = proveedor;
         return await pool.query(
@@ -74,12 +74,10 @@ export const ProveedorModel = {
             [nombre, direccion, telefono, correo, estado, id]
         );
     },
-    
-    // --- CAMBIO CLAVE ---
-    // Se reemplaza la consulta UPDATE por un DELETE para borrar el registro permanentemente.
+    // CORRECCIÓN: Se cambia a un borrado lógico (desactivación)
     eliminar: async (id: number) => {
         return await pool.query(
-            `DELETE FROM proveedores WHERE id_proveedor = $1`,
+            `UPDATE proveedores SET estado = FALSE WHERE id_proveedor = $1`,
             [id]
         );
     }

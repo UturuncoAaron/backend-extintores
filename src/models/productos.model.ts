@@ -15,21 +15,22 @@ export interface Producto {
 // --- FUNCIONES CRUD ---
 
 // CREATE: Crear un nuevo producto
-export const create = async (datosProducto: Omit<Producto, 'id_producto' | 'estado'>): Promise<Producto> => {
-    const { nombre, descripcion, tipo, peso_kg, categoria, precio_unitario } = datosProducto;
+export const create = async (datosProducto: Partial<Producto>): Promise<Producto> => {
+    const { nombre, descripcion, tipo, peso_kg, categoria, precio_unitario, estado = true } = datosProducto;
     const consulta = `
-        INSERT INTO productos (nombre, descripcion, tipo, peso_kg, categoria, precio_unitario) 
-        VALUES ($1, $2, $3, $4, $5, $6) 
+        INSERT INTO productos (nombre, descripcion, tipo, peso_kg, categoria, precio_unitario, estado) 
+        VALUES ($1, $2, $3, $4, $5, $6, $7) 
         RETURNING *
     `;
-    const valores = [nombre, descripcion, tipo, peso_kg, categoria, precio_unitario];
+    const valores = [nombre, descripcion, tipo, peso_kg, categoria, precio_unitario, estado];
     const resultado = await pool.query(consulta, valores);
     return resultado.rows[0];
 };
 
 // READ ALL: Obtener todos los productos
+// CORRECCIÓN: Se añade el filtro para mostrar solo los activos
 export const findAll = async (): Promise<Producto[]> => {
-    const consulta = 'SELECT * FROM productos ORDER BY id_producto ASC';
+    const consulta = 'SELECT * FROM productos WHERE estado = TRUE ORDER BY id_producto ASC';
     const resultado = await pool.query(consulta);
     return resultado.rows;
 };
@@ -63,8 +64,9 @@ export const update = async (id: number, datosProducto: Partial<Producto>): Prom
 };
 
 // DELETE: Eliminar un producto por su ID
+// CORRECCIÓN: Se cambia a un borrado lógico (desactivación)
 export const remove = async (id: number): Promise<Producto | null> => {
-    const consulta = 'DELETE FROM productos WHERE id_producto = $1 RETURNING *';
+    const consulta = 'UPDATE productos SET estado = FALSE WHERE id_producto = $1 RETURNING *';
     const resultado = await pool.query(consulta, [id]);
     return resultado.rows[0] || null;
 };
