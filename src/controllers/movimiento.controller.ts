@@ -20,3 +20,12 @@ export const listarMovimientos = async (_req: Request, res: Response) => {
         res.status(500).json({ mensaje: "Error al obtener movimientos", error });
     }
 };
+export const obtenerHistorialPorProducto = async (req: Request, res: Response) => {
+  try {
+    const idProducto = parseInt(req.params.id, 10);
+    const historial = await MovimientoModel.findByIdProducto(idProducto);
+    res.json(historial);
+  } catch (error) {
+    res.status(500).json({ mensaje: "Error al obtener el historial del producto", error });
+  }
+};

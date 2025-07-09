@@ -1,9 +1,15 @@
 import { Router } from "express";
-import { registrarMovimiento, listarMovimientos } from "../controllers/movimiento.controller";
+// 1. Importamos la nueva función del controlador
+import { listarMovimientos, obtenerHistorialPorProducto } from "../controllers/movimiento.controller";
 
 const router = Router();
 
-router.post("/", registrarMovimiento);
+// Ruta para obtener el historial COMPLETO de todos los movimientos
 router.get("/", listarMovimientos);
+
+// Ruta para obtener el historial de UN SOLO producto por su ID
+router.get("/:id", obtenerHistorialPorProducto);
+
+// 2. Eliminamos la ruta POST. ¡Ya no es necesaria aquí!
 
 export default router;

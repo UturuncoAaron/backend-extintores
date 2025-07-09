@@ -1,4 +1,4 @@
- 
+
 import { pool } from "../config/db";
 
 interface Movimiento {
@@ -7,6 +7,7 @@ interface Movimiento {
     cantidad: number;
     motivo: string;
 }
+
 
 export const MovimientoModel = {
     crear: async (movimiento: Movimiento) => {
@@ -44,6 +45,7 @@ export const MovimientoModel = {
         }
     },
 
+    // Esta es tu función actual para el historial completo
     listar: async () => {
         const result = await pool.query(`
             SELECT m.id_movimiento, p.nombre, m.tipo, m.cantidad, m.fecha, m.motivo
@@ -52,5 +54,25 @@ export const MovimientoModel = {
             ORDER BY m.fecha DESC
         `);
         return result.rows;
+    },
+
+    // --- ¡AQUÍ ESTÁ LA NUEVA FUNCIÓN! ---
+    // Obtiene el historial de un solo producto por su ID
+    findByIdProducto: async (idProducto: number) => {
+        const consulta = `
+            SELECT 
+                fecha,
+                tipo,
+                cantidad,
+                motivo
+            FROM 
+                movimientos_inventario
+            WHERE 
+                id_producto = $1
+            ORDER BY 
+                fecha DESC;
+        `;
+        const resultado = await pool.query(consulta, [idProducto]);
+        return resultado.rows;
     }
 };
